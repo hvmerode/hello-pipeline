@@ -22,7 +22,11 @@ public class PipelineUnit {
 
         // Add commands to the bundle. These commands are executed for every test, so you only have to do it once
         // The pipeline may not fail because org.pipeline:junit-pipeline:jar cannot be found
-        pipeline.commandBundle.overrideLiteral("clean install", "clean install -DskipTests", true);
+        // So, ignore all unit tests, because we also don't test the app anyway
+        pipeline.commandBundle.overrideLiteral("clean install", "clean install -Dmaven.test.skip=true", true);
+
+        // Remove the dependency to artifact 'junit-pipeline' before it is deployed to the AzDo test project
+        pipeline.deleteDependencyFromTargetPom("org.pipeline", "junit-pipeline");
     }
 
     @Test
