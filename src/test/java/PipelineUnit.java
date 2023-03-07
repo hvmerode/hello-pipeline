@@ -22,7 +22,7 @@ public class PipelineUnit {
 
         // Add commands to the bundle. These commands are executed for every test, so you only have to do it once
         // The pipeline may not fail because org.pipeline:junit-pipeline:jar cannot be found
-        pipeline.commandBundle.overrideLiteral("clean install", "-fn clean install", true);
+        pipeline.commandBundle.overrideLiteral("clean install", "clean install -DskipTests", true);
     }
 
     @Test
