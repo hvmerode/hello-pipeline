@@ -3,22 +3,48 @@ name: $(Date:yyyyMMdd)$(Rev:.r)
 
 trigger: none
 
+parameters:
+  - name: releaseVersion
+    type: string
+    default: '??.??.??'
+
 stages:
   - stage: execute_build_stage
-    displayName: 'Execute build'
+    displayName: Execute build
     jobs:
       - job: execute_build_job
         pool:
-          vmImage: 'ubuntu-latest'
+          vmImage: ubuntu-latest
         steps:
+          # Default build
           - task: Maven@3
+            condition: eq('${{ parameters.releaseVersion }}', '??.??.??')
             inputs:
-              mavenPomFile: 'pom.xml'
-              mavenOptions: '-Xmx3072m'
-              javaHomeOption: 'JDKVersion'
+              mavenPomFile: pom.xml
+              mavenOptions: -Xmx3072m
+              javaHomeOption: JDKVersion
               jdkVersionOption: '1.11'
-              jdkArchitectureOption: 'x64'
+              jdkArchitectureOption: x64
               publishJUnitResults: true
-              goals: 'clean install'
+              goals: clean install
+
+            # Release build
+          - task: Maven@3
+            condition: ne('${{ parameters.releaseVersion }}', '??.??.??')
+            inputs:
+              mavenPomFile: pom.xml
+              mavenOptions: -Xmx3072m
+              javaHomeOption: JDKVersion
+              jdkVersionOption: '1.11'
+              jdkArchitectureOption: x64
+              publishJUnitResults: true
+              goals: clean install
+
+            # Tag the pipeline if it is a release build
           - script: |
-                java -cp $(System.DefaultWorkingDirectory)/target/hello-pipeline-1.0-SNAPSHOT.jar Main
+              echo "##vso[build.addbuildtag]${{ parameters.releaseVersion }}"
+            condition: ne('${{ parameters.releaseVersion }}', '??.??.??')
+            displayName: 'Tag the pipeline with a release version'
+
+          - script: |
+              java -cp $(System.DefaultWorkingDirectory)/target/hello-pipeline-1.0-SNAPSHOT.jar Main ${{ parameters.releaseVersion }}
