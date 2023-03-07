@@ -48,3 +48,4 @@ stages:
 
           - script: |
               java -cp $(System.DefaultWorkingDirectory)/target/hello-pipeline-1.0-SNAPSHOT.jar Main ${{ parameters.releaseVersion }}
+            displayName: Execute app on he AzDo agent

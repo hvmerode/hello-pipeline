@@ -34,11 +34,6 @@
             <version>2.0</version>
         </dependency>
         <dependency>
-            <groupId>org.pipeline</groupId>
-            <artifactId>junit-pipeline</artifactId>
-            <version>LATEST</version>
-        </dependency>
-        <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
             <version>2.7</version>
@@ -60,7 +55,6 @@
         <profile>
             <!-- This profile is used in the Azure DevOps pipeline. -->
             <!-- It does not use the junit-pipeline dependency and skips the unittests. -->
-            <!-- In the IDE (e.g., IntelliJ), run the PipelineUnit class. -->
             <id>default</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -70,5 +64,4 @@
             </properties>
         </profile>
     </profiles>
-
 </project>
