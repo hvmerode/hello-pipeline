@@ -1,0 +1,24 @@
+# Build numbering format
+name: $(Date:yyyyMMdd)$(Rev:.r)
+
+trigger: none
+
+stages:
+  - stage: execute_build_stage
+    displayName: 'Execute build'
+    jobs:
+      - job: execute_build_job
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - task: Maven@3
+            inputs:
+              mavenPomFile: 'pom.xml'
+              mavenOptions: '-Xmx3072m'
+              javaHomeOption: 'JDKVersion'
+              jdkVersionOption: '1.11'
+              jdkArchitectureOption: 'x64'
+              publishJUnitResults: true
+              goals: 'clean install'
+          - script: |
+                java -cp $(System.DefaultWorkingDirectory)/target/hello-pipeline-1.0-SNAPSHOT.jar Main
