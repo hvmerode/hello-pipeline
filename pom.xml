@@ -5,10 +5,16 @@
   <groupId>org.example</groupId>
   <artifactId>hello-pipeline</artifactId>
   <version>1.0-SNAPSHOT</version>
+
   <properties>
     <maven.compiler.target>11</maven.compiler.target>
     <maven.compiler.source>11</maven.compiler.source>
   </properties>
+
+  <build>
+    <defaultGoal>install</defaultGoal>
+  </build>
+
   <dependencies>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
@@ -41,7 +47,4 @@
       <version>1.0-SNAPSHOT</version>
     </dependency>
   </dependencies>
-  <build>
-    <defaultGoal>install</defaultGoal>
-  </build>
 </project>
