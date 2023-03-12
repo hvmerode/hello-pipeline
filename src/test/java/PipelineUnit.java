@@ -20,16 +20,28 @@ public class PipelineUnit {
         // Initialize the pipeline (resource path is default)
         pipeline = new AzDoPipeline("hello-pipeline-my.properties", "./pipeline/pipeline.yml");
 
-        // Remove the dependency to artifact 'junit-pipeline' before it is deployed to the AzDo test project
+        /* Remove the dependency to the 'junit-pipeline' jar, before it is deployed to the AzDo test project.
+           Normally, this dependency is stored in a repository or in Azure DevOps artifacts. When building the Maven
+           artifact, the location of this dependency is configured and the Maven build will not fail.
+           In this test application, the dependency is removed from the pom.xml to prevent build errors (cannot find library).
+         */
         pipeline.deleteDependencyFromTargetPom("org.pipeline", "junit-pipeline");
 
-        /*
-            Add commands to the bundle. These commands are executed for every test, so you only have to do it once.
-            The pipeline may not fail because org.pipeline:junit-pipeline:jar cannot be found (it is deleted from the pom.xml).
-            The pipeline may also not fails because the PipelineUnit.java cannot be compiled (because the org.pipeline:junit-pipeline:jar was removed).
-            So, ignore all unit tests, because we also don't test the app anyway.
+        /* In addition to that, the PipelineUnit.java is also removed when pushed to the Azure DevOps test project.
+           The PipelineUnit.java is only executed locally, in your IDE (for example, Intellij), and is not executed as unit test
+           in Azure DevOps.
+           Reason to remove it completely, is to prevent a compiler error because the 'junit-pipeline' jar cannot be found.
+           Unfortunately, Maven isn't so flexible to provide options to exclude a file from compilation; I tried all kinds
+           of exclude variations, but only the option "-Dmaven.test.skip=true" seemed to work.
+
+           The pom.xml is configured in such a way that it excludes the PipelineUnit test in normal usage of this repository
+           (that is, the 'junit-pipeline' jar can be found in Azure DevOps, the PipelineUnit.java can be compiled, and after compilation
+           excluded from unit test execution).
          */
-        pipeline.commandBundle.overrideLiteral("clean install", "clean install -Dmaven.test.skip=true", true);
+        try {
+            pipeline.deleteTargetFile("src/test/java/PipelineUnit.java");
+        }
+        catch (Exception e) {}
     }
 
     @Test

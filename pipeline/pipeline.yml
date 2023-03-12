@@ -47,5 +47,5 @@ stages:
             displayName: 'Tag the pipeline with a release version'
 
           - script: |
-              java -cp $(System.DefaultWorkingDirectory)/target/hello-pipeline-1.0-SNAPSHOT.jar Main ${{ parameters.releaseVersion }}
+              java -cp $(System.DefaultWorkingDirectory)/target/hello-pipeline-1.0.0-SNAPSHOT.jar Main ${{ parameters.releaseVersion }}
             displayName: Execute app on the AzDo agent
