@@ -17,7 +17,12 @@ public class PipelineUnit {
     public static void setUpClass() {
         System.out.println("setUpClass");
 
-        // Initialize the pipeline (resource path is default)
+        /* Initialize the pipeline with the properties file and the primary pipeline file.
+           This class uses 'hello-pipeline-my.properties', which must be present in src/main/resources
+           In this repo, the resources directory only contains the file 'hello-pipeline-my.properties', which must be
+           adjusted to your specific situation (e.g. configuring source- and target path,
+           personal access token (target.repository.password), project identifier (project.id), ...etc.)
+         */
         pipeline = new AzDoPipeline("hello-pipeline-my.properties", "./pipeline/pipeline.yml");
 
         /* Remove the dependency to the 'junit-pipeline' jar, before it is deployed to the AzDo test project.
