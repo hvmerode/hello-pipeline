@@ -17,11 +17,12 @@ public class PipelineUnit {
     public static void setUpClass() {
         System.out.println("setUpClass");
 
-        /* Initialize the pipeline with the properties file and the primary pipeline file.
-           This class uses 'hello-pipeline-my.properties', which must be present in src/main/resources
-           In this repo, the resources directory only contains the file 'hello-pipeline-my.properties', which must be
-           adjusted to your specific situation (e.g. configuring source- and target path,
-           personal access token (target.repository.password), project identifier (project.id), ...etc.)
+        /* Initialize the pipeline with the properties file ('hello-pipeline-my.properties', which must be present in
+           src/main/resources), and the primary pipeline file ('./pipeline/pipeline.yml').
+           Note, that the file 'hello-pipeline-my.properties' is not present in this repository. In this repo,
+           only the file 'hello-pipeline.properties' is present, which must be adjusted to your specific
+           situation (e.g. configuring source- and target path, personal access token (target.repository.password),
+           project identifier (project.id), ...etc.)
          */
         pipeline = new AzDoPipeline("hello-pipeline-my.properties", "./pipeline/pipeline.yml");
 
