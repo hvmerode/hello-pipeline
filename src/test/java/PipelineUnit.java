@@ -1,14 +1,12 @@
 import azdo.junit.AzDoPipeline;
 import azdo.junit.RunResult;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class PipelineUnit {
     private static Logger logger = LoggerFactory.getLogger(PipelineUnit.class);
     private static AzDoPipeline pipeline;
@@ -51,6 +49,7 @@ public class PipelineUnit {
     }
 
     @Test
+    @Order(1)
     public void testDefaultBuild() {
         logger.info("");
         logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
@@ -67,6 +66,7 @@ public class PipelineUnit {
     }
 
     @Test
+    @Order(2)
     public void testReleaseBuild() {
         logger.info("");
         logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
