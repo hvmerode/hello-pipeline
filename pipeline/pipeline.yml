@@ -18,7 +18,8 @@ stages:
         steps:
           # Default build
           - task: Maven@3
-            condition: eq('${{ parameters.releaseVersion }}', '??.??.??')
+            condition: ne(variables['Build.SourceBranchName'], 'release')
+            displayName: Regular build
             inputs:
               mavenPomFile: pom.xml
               mavenOptions: -Xmx3072m
@@ -30,7 +31,8 @@ stages:
 
             # Release build
           - task: Maven@3
-            condition: ne('${{ parameters.releaseVersion }}', '??.??.??')
+            condition: eq(variables['Build.SourceBranchName'], 'release')
+            displayName: Release build
             inputs:
               mavenPomFile: pom.xml
               mavenOptions: -Xmx3072m
