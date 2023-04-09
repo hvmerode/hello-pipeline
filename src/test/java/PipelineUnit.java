@@ -38,7 +38,7 @@ public class PipelineUnit {
         hookList = new ArrayList<>();
         TestProperties properties = pipeline.getProperties();
         hookList.add(new DeleteJUnitPipelineDependency(properties.getTargetPath() + "/" + "pom.xml",
-                "org.pipeline",
+                "io.github.hvmerode",
                 "junit-pipeline"));
         String fullQualifiedFileName = properties.getTargetPath() + "/" + "src/test/java/PipelineUnit.java";
         hookList.add(new DeleteTargetFile(fullQualifiedFileName));
