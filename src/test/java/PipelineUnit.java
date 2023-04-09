@@ -32,8 +32,8 @@ public class PipelineUnit {
         pipeline = new AzDoPipeline("hello-pipeline-my.properties", "./pipeline/pipeline.yml");
 
         // Create a list with hooks
-        // These hooks take care that stuff causing errors, is removed from the target directory. It removes:
-        // - the dependency from pom.xml
+        // These hooks take care that stuff causing errors, are removed from the target directory. It removes:
+        // - the dependency from the pom.xml
         // - the unit tests of the pipeline
         hookList = new ArrayList<>();
         TestProperties properties = pipeline.getProperties();
@@ -54,7 +54,7 @@ public class PipelineUnit {
 
         try {
             // Start the pipeline
-            pipeline.startPipeline(hookList);
+            pipeline.startPipeline("master", hookList);
         }
         catch (IOException e) {
             e.printStackTrace();
