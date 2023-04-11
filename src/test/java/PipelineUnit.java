@@ -1,3 +1,6 @@
+// Copyright (c) Henry van Merode.
+// Licensed under the MIT License.
+
 import azdo.hook.DeleteJUnitPipelineDependency;
 import azdo.hook.DeleteTargetFile;
 import azdo.hook.Hook;

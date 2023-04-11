@@ -1,4 +1,7 @@
-# Build numbering format
+# Copyright (c) Henry van Merode.
+# Licensed under the MIT License.
+
+  # Build numbering format
 name: $(Date:yyyyMMdd)$(Rev:.r)
 
 trigger: none
