@@ -6,7 +6,7 @@ import azdo.hook.DeleteTargetFile;
 import azdo.hook.Hook;
 import azdo.junit.AzDoPipeline;
 import azdo.junit.RunResult;
-import azdo.junit.TestProperties;
+import azdo.utils.PropertyUtils;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +39,7 @@ public class PipelineUnit {
         // - the dependency from the pom.xml
         // - the unit tests of the pipeline
         hookList = new ArrayList<>();
-        TestProperties properties = pipeline.getProperties();
+        PropertyUtils properties = pipeline.getProperties();
         hookList.add(new DeleteJUnitPipelineDependency(properties.getTargetPath() + "/" + "pom.xml",
                 "io.github.hvmerode",
                 "junit-pipeline"));
