@@ -22,8 +22,7 @@ public class PipelineUnit {
            src/main/resources), and the primary pipeline file ('./pipeline/pipeline.yml').
            Note, that the file 'hello-pipeline-my.properties' is not present in this repository. In this repo,
            only the file 'hello-pipeline.properties' is present, which must be adjusted to your specific
-           situation (e.g. configuring source- and target path, personal access token (target.repository.password),
-           project identifier (project.id), ...etc.)
+           situation (e.g. configuring source- and target path, personal access token (azdo.pat), etc...)
            For more information: https://github.com/hvmerode/junit-pipeline
          */
         pipeline = new AzDoPipeline("hello-pipeline-my.properties", "./pipeline/pipeline.yml");
