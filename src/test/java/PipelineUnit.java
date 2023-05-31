@@ -1,29 +1,22 @@
 // Copyright (c) Henry van Merode.
 // Licensed under the MIT License.
 
-import azdo.hook.DeleteJUnitPipelineDependency;
-import azdo.hook.DeleteTargetFile;
-import azdo.hook.Hook;
 import azdo.junit.AzDoPipeline;
 import azdo.junit.RunResult;
-import azdo.utils.PropertyUtils;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class PipelineUnit {
     private static Logger logger = LoggerFactory.getLogger(PipelineUnit.class);
     private static AzDoPipeline pipeline;
-    private static List<Hook> hookList;
 
     @BeforeAll
     public static void setUpClass() {
-        System.out.println("setUpClass");
+        logger.info("setUpClass");
 
         /* Initialize the pipeline with the properties file ('hello-pipeline-my.properties', which must be present in
            src/main/resources), and the primary pipeline file ('./pipeline/pipeline.yml').
@@ -31,20 +24,9 @@ public class PipelineUnit {
            only the file 'hello-pipeline.properties' is present, which must be adjusted to your specific
            situation (e.g. configuring source- and target path, personal access token (target.repository.password),
            project identifier (project.id), ...etc.)
+           For more information: https://github.com/hvmerode/junit-pipeline
          */
         pipeline = new AzDoPipeline("hello-pipeline-my.properties", "./pipeline/pipeline.yml");
-
-        // Create a list with hooks
-        // These hooks take care that stuff causing errors, are removed from the target directory. It removes:
-        // - the dependency from the pom.xml
-        // - the unit tests of the pipeline
-        hookList = new ArrayList<>();
-        PropertyUtils properties = pipeline.getProperties();
-        hookList.add(new DeleteJUnitPipelineDependency(properties.getTargetPath() + "/" + "pom.xml",
-                "io.github.hvmerode",
-                "junit-pipeline"));
-        String fullQualifiedFileName = properties.getTargetPath() + "/" + "src/test/java/PipelineUnit.java";
-        hookList.add(new DeleteTargetFile(fullQualifiedFileName));
     }
 
     @Test
@@ -57,7 +39,7 @@ public class PipelineUnit {
 
         try {
             // Start the pipeline
-            pipeline.startPipeline("master", hookList);
+            pipeline.startPipeline("master");
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -77,7 +59,7 @@ public class PipelineUnit {
         pipeline.overrideParameterDefault("releaseVersion", "1.0.0");
 
         try {
-            pipeline.startPipeline("release", hookList);
+            pipeline.startPipeline("release");
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -87,6 +69,6 @@ public class PipelineUnit {
 
     @AfterAll
     public static void tearDown() {
-        System.out.println("\ntearDown");
+        logger.info("tearDown");
     }
 }
