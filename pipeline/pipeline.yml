@@ -1,44 +1,52 @@
 # Copyright (c) Henry van Merode.
 # Licensed under the MIT License.
 
-  # Build numbering format
+# Build numbering format
 name: $(Date:yyyyMMdd)$(Rev:.r)
 
 trigger: none
 
-parameters:
-  - name: releaseVersion
-    type: string
-    default: '??.??.??'
+variables:
+  - name: revisionSnapshot
+    value: "1.0.0-SNAPSHOT"
+  - name: revisionRelease
+    value: "1.0.0"
+    #value: ""
 
 stages:
-  - stage: execute_build_stage
-    displayName: Execute build
+  - stage: PipelineStage
+    displayName: Build and Release pipeline
     jobs:
-      - job: execute_build_job
+      - job: PipelineJob
         pool:
           vmImage: ubuntu-latest
         steps:
-          # Default build
+          # Snapshot build
           - task: Maven@3
-            condition: ne(variables['Build.SourceBranchName'], 'release')
-            displayName: Regular build
+            condition: and(succeeded(), ne(variables['Build.SourceBranchName'], 'master'))
+            displayName: Snapshot build
             inputs:
               mavenPomFile: pom.xml
-              mavenOptions: -Xmx3072m
+              mavenOptions: -Xmx3072m -Drevision=$(revisionSnapshot)
               javaHomeOption: JDKVersion
               jdkVersionOption: '1.11'
               jdkArchitectureOption: x64
               publishJUnitResults: true
               goals: clean install
 
+            # Execute the artifact if it is a release build
+          - script: |
+              java -cp $(System.DefaultWorkingDirectory)/target/hello-pipeline-$(revisionSnapshot).jar Main $(revisionSnapshot)
+            condition: and(succeeded(), ne(variables['Build.SourceBranchName'], 'master'))
+            displayName: 'Execute snapshot version on the AzDo agent'
+
             # Release build
           - task: Maven@3
-            condition: eq(variables['Build.SourceBranchName'], 'release')
+            condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
             displayName: Release build
             inputs:
               mavenPomFile: pom.xml
-              mavenOptions: -Xmx3072m
+              mavenOptions: -Xmx3072m -Drevision=$(revisionRelease)
               javaHomeOption: JDKVersion
               jdkVersionOption: '1.11'
               jdkArchitectureOption: x64
@@ -47,10 +55,13 @@ stages:
 
             # Tag the pipeline if it is a release build
           - script: |
-              echo "##vso[build.addbuildtag]${{ parameters.releaseVersion }}"
-            condition: ne('${{ parameters.releaseVersion }}', '??.??.??')
+              echo "##vso[build.addbuildtag]$(revisionRelease)"
+            condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
             displayName: 'Tag the pipeline with a release version'
 
+            # Execute the artifact if it is a release build
           - script: |
-              java -cp $(System.DefaultWorkingDirectory)/target/hello-pipeline-1.0.0-SNAPSHOT.jar Main ${{ parameters.releaseVersion }}
-            displayName: Execute app on the AzDo agent
+              java -cp $(System.DefaultWorkingDirectory)/target/hello-pipeline-$(revisionRelease).jar Main $(revisionRelease)
+            condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
+            displayName: 'Execute release version on the AzDo agent'
+

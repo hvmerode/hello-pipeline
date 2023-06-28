@@ -1,6 +1,9 @@
 // Copyright (c) Henry van Merode.
 // Licensed under the MIT License.
 
+import azdo.hook.DeleteJUnitPipelineDependency;
+import azdo.hook.DeleteTargetFile;
+import azdo.hook.Hook;
 import azdo.junit.AzDoPipeline;
 import azdo.junit.RunResult;
 import org.junit.jupiter.api.*;
@@ -8,37 +11,45 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class PipelineUnit {
     private static Logger logger = LoggerFactory.getLogger(PipelineUnit.class);
     private static AzDoPipeline pipeline;
+    private static final String RELEASE_ARTIFACT = "$(System.DefaultWorkingDirectory)/target/hello-pipeline-1.0.0.jar";
+    private static final String PIPELINE = "./pipeline/pipeline.yml";
+    private static final String STEP_RELEASE_BUILD = "Release build";
+    private static final String SCRIPT_TAG_PIPELINE = "Tag the pipeline with a release version";
+    private static final String SCRIPT_EXECUTE_SNAPSHOT_ARTIFACT = "Execute snapshot version on the AzDo agent";
+    private static final String SCRIPT_EXECUTE_RELEASE_ARTIFACT = "Execute release version on the AzDo agent";
+
+    private static List<Hook> hookList = new ArrayList<>(); // TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST
 
     @BeforeAll
     public static void setUpClass() {
         logger.info("setUpClass");
 
-        /* Initialize the pipeline with the properties file ('hello-pipeline-my.properties', which must be present in
-           src/main/resources), and the primary pipeline file ('./pipeline/pipeline.yml').
-           Note, that the file 'hello-pipeline-my.properties' is not present in this repository. In this repo,
-           only the file 'hello-pipeline.properties' is present, which must be adjusted to your specific
-           situation (e.g. configuring source- and target path, personal access token (azdo.pat), etc...)
-           For more information: https://github.com/hvmerode/junit-pipeline
-         */
-        pipeline = new AzDoPipeline("hello-pipeline-my.properties", "./pipeline/pipeline.yml");
+        pipeline = new AzDoPipeline("hello-pipeline-my.properties", PIPELINE);
+
+        // TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST
+        hookList.add(new DeleteJUnitPipelineDependency("C:\\Users\\MerodeHJ.RABONETEU\\IdeaProjects\\hello-pipeline-test\\pom.xml", "io.github.hvmerode", "junit-pipeline"));
+        hookList.add(new DeleteTargetFile("C:\\Users\\MerodeHJ.RABONETEU\\IdeaProjects\\hello-pipeline-test\\src\\test\\java\\PipelineUnit.java"));
+        // TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST
     }
 
     @Test
     @Order(1)
-    public void testDefaultBuild() {
+    public void testSnapshotBuild() {
         logger.info("");
         logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-        logger.info("Perform unittest: Test default build");
+        logger.info("Perform unittest: Test snapshot build");
         logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
         try {
-            // Start the pipeline
-            pipeline.startPipeline("master");
+            //pipeline.startPipeline("feature");
+            pipeline.startPipeline("feature", hookList); // TESTTESTTESTTEST
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -48,17 +59,54 @@ public class PipelineUnit {
 
     @Test
     @Order(2)
-    public void testReleaseBuild() {
+    public void testOnlyReleaseBuild() {
         logger.info("");
         logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         logger.info("Perform unittest: Test release build");
         logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
-        // Assign the release version to the parameter
-        pipeline.overrideParameterDefault("releaseVersion", "1.0.0");
+        try {
+            // Given
+            pipeline.skipStepSearchByDisplayName(SCRIPT_TAG_PIPELINE);
+            pipeline.skipStepSearchByDisplayName(SCRIPT_EXECUTE_RELEASE_ARTIFACT);
+
+            // Then
+            pipeline.assertNotEqualsSearchStepByDisplayName(STEP_RELEASE_BUILD,
+                    "revisionRelease",
+                    "1.0.0",
+                    true);
+            pipeline.assertFileNotExistsSearchStepByDisplayName(STEP_RELEASE_BUILD, RELEASE_ARTIFACT, false);
+
+            // When
+            pipeline.startPipeline("master", hookList);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        Assertions.assertEquals (RunResult.Result.succeeded, pipeline.getRunResult().result);
+    }
+
+    @Test
+    @Order(3)
+    public void testReleaseBuild() {
+        logger.info("");
+        logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        logger.info("Perform unittest: Test release build and execute the artifact");
+        logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
         try {
-            pipeline.startPipeline("release");
+            // Given
+            // There is a pipeline
+
+            // Then
+            pipeline.assertNotEqualsSearchStepByDisplayName(STEP_RELEASE_BUILD,
+                    "revisionRelease",
+                    "1.0.0",
+                    true);
+            pipeline.assertFileNotExistsSearchStepByDisplayName(STEP_RELEASE_BUILD, RELEASE_ARTIFACT, false);
+
+            // When
+            pipeline.startPipeline("master", hookList);
         }
         catch (IOException e) {
             e.printStackTrace();
