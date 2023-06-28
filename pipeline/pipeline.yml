@@ -21,7 +21,7 @@ stages:
         pool:
           vmImage: ubuntu-latest
         steps:
-          # Snapshot build
+          # SNAPSHOT build
           - task: Maven@3
             condition: and(succeeded(), ne(variables['Build.SourceBranchName'], 'master'))
             displayName: Snapshot build
@@ -34,13 +34,13 @@ stages:
               publishJUnitResults: true
               goals: clean install
 
-            # Execute the artifact if it is a release build
+            # Execute the artifact if it is a SNAPSHOT build
           - script: |
               java -cp $(System.DefaultWorkingDirectory)/target/hello-pipeline-$(revisionSnapshot).jar Main $(revisionSnapshot)
             condition: and(succeeded(), ne(variables['Build.SourceBranchName'], 'master'))
             displayName: 'Execute snapshot version on the AzDo agent'
 
-            # Release build
+            # RELEASE build
           - task: Maven@3
             condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
             displayName: Release build
@@ -53,15 +53,14 @@ stages:
               publishJUnitResults: true
               goals: clean install
 
-            # Tag the pipeline if it is a release build
+            # Tag the pipeline if it is a RELEASE build
           - script: |
               echo "##vso[build.addbuildtag]$(revisionRelease)"
             condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
             displayName: 'Tag the pipeline with a release version'
 
-            # Execute the artifact if it is a release build
+            # Execute the artifact if it is a RELEASE build
           - script: |
               java -cp $(System.DefaultWorkingDirectory)/target/hello-pipeline-$(revisionRelease).jar Main $(revisionRelease)
             condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
             displayName: 'Execute release version on the AzDo agent'
-

@@ -1,18 +1,13 @@
 // Copyright (c) Henry van Merode.
 // Licensed under the MIT License.
 
-import azdo.hook.DeleteJUnitPipelineDependency;
-import azdo.hook.DeleteTargetFile;
-import azdo.hook.Hook;
 import azdo.junit.AzDoPipeline;
 import azdo.junit.RunResult;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class PipelineUnit {
@@ -25,18 +20,11 @@ public class PipelineUnit {
     private static final String SCRIPT_EXECUTE_SNAPSHOT_ARTIFACT = "Execute snapshot version on the AzDo agent";
     private static final String SCRIPT_EXECUTE_RELEASE_ARTIFACT = "Execute release version on the AzDo agent";
 
-    private static List<Hook> hookList = new ArrayList<>(); // TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST
-
     @BeforeAll
     public static void setUpClass() {
         logger.info("setUpClass");
 
         pipeline = new AzDoPipeline("hello-pipeline-my.properties", PIPELINE);
-
-        // TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST
-        hookList.add(new DeleteJUnitPipelineDependency("C:\\Users\\MerodeHJ.RABONETEU\\IdeaProjects\\hello-pipeline-test\\pom.xml", "io.github.hvmerode", "junit-pipeline"));
-        hookList.add(new DeleteTargetFile("C:\\Users\\MerodeHJ.RABONETEU\\IdeaProjects\\hello-pipeline-test\\src\\test\\java\\PipelineUnit.java"));
-        // TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST
     }
 
     @Test
@@ -48,8 +36,7 @@ public class PipelineUnit {
         logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
         try {
-            //pipeline.startPipeline("feature");
-            pipeline.startPipeline("feature", hookList); // TESTTESTTESTTEST
+            pipeline.startPipeline("feature");
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -78,7 +65,7 @@ public class PipelineUnit {
             pipeline.assertFileNotExistsSearchStepByDisplayName(STEP_RELEASE_BUILD, RELEASE_ARTIFACT, false);
 
             // When
-            pipeline.startPipeline("master", hookList);
+            pipeline.startPipeline("master");
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -106,7 +93,7 @@ public class PipelineUnit {
             pipeline.assertFileNotExistsSearchStepByDisplayName(STEP_RELEASE_BUILD, RELEASE_ARTIFACT, false);
 
             // When
-            pipeline.startPipeline("master", hookList);
+            pipeline.startPipeline("master");
         }
         catch (IOException e) {
             e.printStackTrace();
