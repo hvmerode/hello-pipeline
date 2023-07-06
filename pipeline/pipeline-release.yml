@@ -6,10 +6,9 @@ name: $(Date:yyyyMMdd)$(Rev:.r)
 
 trigger: none
 
-parameters:
+variables:
   - name: releaseVersion
-    type: string
-    default: '??.??.??'
+    value: 1.0.0
 
 stages:
   - stage: execute_build_stage
@@ -19,13 +18,13 @@ stages:
         pool:
           vmImage: ubuntu-latest
         steps:
-          # Default build
+          # Snapshot build
           - task: Maven@3
-            condition: ne(variables['Build.SourceBranchName'], 'release')
-            displayName: Regular build
+            condition: and(succeeded(), ne(variables['Build.SourceBranchName'], 'master'))
+            displayName: Snapshot build
             inputs:
               mavenPomFile: pom.xml
-              mavenOptions: -Xmx3072m
+              mavenOptions: -Xmx3072m -Drevision=1.0.0-SNAPSHOT
               javaHomeOption: JDKVersion
               jdkVersionOption: '1.11'
               jdkArchitectureOption: x64
@@ -34,11 +33,11 @@ stages:
 
             # Release build
           - task: Maven@3
-            condition: eq(variables['Build.SourceBranchName'], 'release')
+            condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
             displayName: Release build
             inputs:
               mavenPomFile: pom.xml
-              mavenOptions: -Xmx3072m
+              mavenOptions: -Xmx3072m -Drevision=$(releaseVersion)
               javaHomeOption: JDKVersion
               jdkVersionOption: '1.11'
               jdkArchitectureOption: x64
@@ -47,10 +46,11 @@ stages:
 
             # Tag the pipeline if it is a release build
           - script: |
-              echo "##vso[build.addbuildtag]${{ parameters.releaseVersion }}"
-            condition: ne('${{ parameters.releaseVersion }}', '??.??.??')
+              echo "##vso[build.addbuildtag]$(releaseVersion)"
+            condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
             displayName: 'Tag the pipeline with a release version'
 
           - script: |
-              java -cp $(System.DefaultWorkingDirectory)/target/hello-pipeline-1.0.0-SNAPSHOT.jar Main ${{ parameters.releaseVersion }}
+              java -cp $(System.DefaultWorkingDirectory)/target/hello-pipeline-$(releaseVersion).jar Main $(releaseVersion)
             displayName: Execute app on the AzDo agent
+            condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))

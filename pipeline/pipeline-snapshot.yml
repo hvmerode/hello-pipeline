@@ -1,0 +1,28 @@
+# Copyright (c) Henry van Merode.
+# Licensed under the MIT License.
+
+  # Build numbering format
+name: $(Date:yyyyMMdd)$(Rev:.r)
+
+trigger: none
+
+stages:
+  - stage: execute_build_stage
+    displayName: Execute build
+    jobs:
+      - job: execute_build_job
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          # Snapshot build
+          - task: Maven@3
+            condition: and(succeeded(), ne(variables['Build.SourceBranchName'], 'master'))
+            displayName: Snapshot build
+            inputs:
+              mavenPomFile: pom.xml
+              mavenOptions: -Xmx3072m -Drevision=1.0.0-SNAPSHOT
+              javaHomeOption: JDKVersion
+              jdkVersionOption: '1.11'
+              jdkArchitectureOption: x64
+              publishJUnitResults: true
+              goals: clean install

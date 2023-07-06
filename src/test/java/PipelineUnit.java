@@ -17,32 +17,28 @@ public class PipelineUnit {
     @BeforeAll
     public static void setUpClass() {
         logger.info("setUpClass");
-
-        /* Initialize the pipeline with the properties file ('hello-pipeline-my.properties', which must be present in
-           src/main/resources), and the primary pipeline file ('./pipeline/pipeline.yml').
-           Note, that the file 'hello-pipeline-my.properties' is not present in this repository. In this repo,
-           only the file 'hello-pipeline.properties' is present, which must be adjusted to your specific
-           situation (e.g. configuring source- and target path, personal access token (azdo.pat), etc...)
-           For more information: https://github.com/hvmerode/junit-pipeline
-         */
-        pipeline = new AzDoPipeline("hello-pipeline-my.properties", "./pipeline/pipeline.yml");
     }
 
     @Test
     @Order(1)
-    public void testDefaultBuild() {
+    public void testSnapshotBuild() {
         logger.info("");
         logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-        logger.info("Perform unittest: Test default build");
+        logger.info("Perform unittest: Test snapshot build");
         logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
+        // Given there is a pipeline
+        pipeline = new AzDoPipeline("hello-pipeline-my.properties", "./pipeline/pipeline-snapshot.yml");
+
         try {
-            // Start the pipeline
-            pipeline.startPipeline("master");
+            // When the pipeline starts
+            pipeline.startPipeline("feature");
         }
         catch (IOException e) {
             e.printStackTrace();
         }
+
+        // Then the result must be 'succeeded'
         Assertions.assertEquals (RunResult.Result.succeeded, pipeline.getRunResult().result);
     }
 
@@ -54,15 +50,25 @@ public class PipelineUnit {
         logger.info("Perform unittest: Test release build");
         logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
-        // Assign the release version to the parameter
-        pipeline.overrideParameterDefault("releaseVersion", "1.0.0");
+        // Given there is a pipeline
+        pipeline = new AzDoPipeline("hello-pipeline-my.properties", "./pipeline/pipeline-release.yml");
+
+        // And a validation to determine whether the 'releaseVersion' variable is empty
+        pipeline.assertEmptySearchStepByDisplayName("Release build", "releaseVersion");
+
+        // And a validation to determine whether the .jar file is build and exists
+        pipeline.assertFileNotExistsSearchStepByDisplayName("Release build",
+                "$(System.DefaultWorkingDirectory)/target/hello-pipeline-$(releaseVersion).jar",
+                false);
 
         try {
-            pipeline.startPipeline("release");
+            // When the pipeline starts
+            pipeline.startPipeline("master");
         }
         catch (IOException e) {
             e.printStackTrace();
         }
+        // Then the result must be 'succeeded'
         Assertions.assertEquals (RunResult.Result.succeeded, pipeline.getRunResult().result);
     }
 
