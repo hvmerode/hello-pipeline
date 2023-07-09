@@ -56,7 +56,7 @@ public class PipelineUnit {
         // And the 'releaseVersion' variable is not empty
         pipeline.assertEmptySearchStepByDisplayName("Release build", "releaseVersion");
 
-        // And a the .jar file is build and exists
+        // And the .jar file has been build and exists
         pipeline.assertFileNotExistsSearchStepByDisplayName("Release build",
                 "$(System.DefaultWorkingDirectory)/target/hello-pipeline-$(releaseVersion).jar",
                 false);
