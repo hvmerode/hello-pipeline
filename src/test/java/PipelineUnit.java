@@ -53,10 +53,10 @@ public class PipelineUnit {
         // Given there is a pipeline
         pipeline = new AzDoPipeline("hello-pipeline-my.properties", "./pipeline/pipeline-release.yml");
 
-        // And a validation to determine whether the 'releaseVersion' variable is empty
+        // And the 'releaseVersion' variable is not empty
         pipeline.assertEmptySearchStepByDisplayName("Release build", "releaseVersion");
 
-        // And a validation to determine whether the .jar file is build and exists
+        // And a the .jar file is build and exists
         pipeline.assertFileNotExistsSearchStepByDisplayName("Release build",
                 "$(System.DefaultWorkingDirectory)/target/hello-pipeline-$(releaseVersion).jar",
                 false);
