@@ -11,10 +11,10 @@ variables:
     value: 1.0.0
 
 stages:
-  - stage: execute_release_build_stage
+  - stage: execute_build_and_deploy_stage
     displayName: Execute build
     jobs:
-      - job: execute_release_build_job
+      - job: execute_build_and_deploy_job
         pool:
           vmImage: ubuntu-latest
         steps:
@@ -55,3 +55,9 @@ stages:
               java -cp $(System.DefaultWorkingDirectory)/target/hello-pipeline-$(releaseVersion).jar Main $(releaseVersion)
             condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
             displayName: 'Execute app on the AzDo agent'
+
+            # Deploy it to target environment using curl
+          - script: |
+              curl --verbose --request POST --data @'$(System.DefaultWorkingDirectory)/target/hello-pipeline-$(releaseVersion).jar' https://example.com
+            condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
+            displayName: 'Deploy to target'
