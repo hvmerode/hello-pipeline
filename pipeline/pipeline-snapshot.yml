@@ -1,7 +1,7 @@
 # Copyright (c) Henry van Merode.
 # Licensed under the MIT License.
 
-  # Build numbering format
+# Build numbering format
 name: $(Date:yyyyMMdd)$(Rev:.r)
 
 trigger: none
@@ -14,7 +14,7 @@ stages:
         pool:
           vmImage: ubuntu-latest
         steps:
-          # Snapshot build
+          # Perform a snapshot build in case the build starts from a feature branch
           - task: Maven@3
             condition: and(succeeded(), ne(variables['Build.SourceBranchName'], 'master'))
             displayName: 'Snapshot build'

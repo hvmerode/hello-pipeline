@@ -14,8 +14,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static azdo.junit.AzDoPipeline.BASH_COMMAND.CURL;
-
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class PipelineUnit {
     private static Logger logger = LoggerFactory.getLogger(PipelineUnit.class);
@@ -34,10 +32,10 @@ public class PipelineUnit {
         logger.info("Perform unit test 1: Test snapshot build");
         logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
-        // Given there is a pipeline
-        pipeline = new AzDoPipeline("hello-pipeline-my.properties", "./pipeline/pipeline-snapshot.yml");
-
         try {
+            // Given there is a pipeline
+            pipeline = new AzDoPipeline("hello-pipeline-my.properties", "./pipeline/pipeline-snapshot.yml");
+
             // When the pipeline starts
             pipeline.startPipeline("feature");
         }
@@ -57,12 +55,12 @@ public class PipelineUnit {
         logger.info("Perform unit test 2: Test release build");
         logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
-        // Given there is a pipeline
-        pipeline = new AzDoPipeline("hello-pipeline-my.properties", "./pipeline/pipeline-release.yml");
-
         try {
-            // And the 'releaseVersion' variable is not empty
-            // And the .jar file has been built and exists
+            // Given there is a pipeline
+            pipeline = new AzDoPipeline("hello-pipeline-my.properties", "./pipeline/pipeline-release.yml");
+
+            // And the 'releaseVersion' variable is not empty before the release build step
+            // And the .jar file has been built and exists after the release build step
             pipeline.assertEmptySearchStepByDisplayName("Release build", "releaseVersion", true)
                     .assertFileNotExistsSearchStepByDisplayName("Release build",
                             "$(System.DefaultWorkingDirectory)/target/hello-pipeline-$(releaseVersion).jar",
@@ -86,24 +84,27 @@ public class PipelineUnit {
         logger.info("Perform unit test 3: Test release build and deployment");
         logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
-        // Given there is a pipeline
-        pipeline = new AzDoPipeline("hello-pipeline-my.properties", "./pipeline/pipeline-release-and-deploy.yml");
-
-        // TESTTESTTESTTESTTESTTESTTESTTESTTESTTEST
-        DeleteJUnitPipelineDependency hook1 = new DeleteJUnitPipelineDependency ("C:\\Users\\Henry\\Documents\\Github\\hello-pipeline-test\\pom.xml", "io.github.hvmerode", "junit-pipeline");
-        DeleteTargetFile hook2 = new DeleteTargetFile("C:\\Users\\Henry\\Documents\\Github\\hello-pipeline-test\\src\\test\\java\\PipelineUnit.java");
-        List<Hook> hooks = new ArrayList<>();
-        hooks.add(hook1);
-        hooks.add(hook2);
-        // TESTTESTTESTTESTTESTTESTTESTTESTTESTTEST
-
         try {
+            // Given there is a pipeline
+            pipeline = new AzDoPipeline("hello-pipeline-my.properties", "./pipeline/pipeline-release-and-deploy.yml");
+
+            // TESTTESTTESTTESTTESTTESTTESTTESTTESTTEST
+            DeleteJUnitPipelineDependency hook1 = new DeleteJUnitPipelineDependency ("C:\\Users\\Henry\\Documents\\Github\\hello-pipeline-test\\pom.xml", "io.github.hvmerode", "junit-pipeline");
+            DeleteTargetFile hook2 = new DeleteTargetFile("C:\\Users\\Henry\\Documents\\Github\\hello-pipeline-test\\src\\test\\java\\PipelineUnit.java");
+            List<Hook> hooks = new ArrayList<>();
+            hooks.add(hook1);
+            hooks.add(hook2);
+            // TESTTESTTESTTESTTESTTESTTESTTESTTESTTEST
+
             // And the pipeline is not tagged with the release version
-            // And the artifacts does not run on the Azure DevOps agent
+            // And the artifact does not run on the Azure DevOps agent
             // And a curl command is executed, deploying the artifact
+            String htmlOutput = "<html>\n  <head>\n    <title>\n      Mock deployment\n    </title>\n  </head>\n</html>\n";
             pipeline.skipStepSearchByDisplayName("Tag the pipeline with a release version")
                     .skipStepSearchByDisplayName("Execute app on the AzDo agent")
-                    .mockBashCommandSearchStepByDisplayName("Deploy to target", CURL, "<html>\n  <head>\n    <title>\n      Mock deployment\n    </title>\n  </head>\n</html>\n");
+                    .mockBashCommandSearchStepByDisplayName("Deploy to target",
+                            "curl",
+                            htmlOutput);
 
             // When the pipeline starts
             pipeline.startPipeline("master", hooks);
