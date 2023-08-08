@@ -1,9 +1,6 @@
 // Copyright (c) Henry van Merode.
 // Licensed under the MIT License.
 
-import azdo.hook.DeleteJUnitPipelineDependency;
-import azdo.hook.DeleteTargetFile;
-import azdo.hook.Hook;
 import azdo.junit.AzDoPipeline;
 import azdo.junit.RunResult;
 import org.junit.jupiter.api.*;
@@ -11,8 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class PipelineUnit {
@@ -33,10 +28,10 @@ public class PipelineUnit {
         logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
         try {
-            // Given there is a pipeline
+            // Given there is a pipeline with a snapshot build
             pipeline = new AzDoPipeline("hello-pipeline-my.properties", "./pipeline/pipeline-snapshot.yml");
 
-            // When the pipeline starts
+            // When the pipeline starts from the feature branch
             pipeline.startPipeline("feature");
         }
         catch (IOException e) {
@@ -56,17 +51,17 @@ public class PipelineUnit {
         logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
         try {
-            // Given there is a pipeline
+            // Given there is a pipeline with a release build
             pipeline = new AzDoPipeline("hello-pipeline-my.properties", "./pipeline/pipeline-release.yml");
 
-            // And the 'releaseVersion' variable is not empty before the release build step
-            // And the .jar file has been built and exists after the release build step
+            // And the 'releaseVersion' variable is not empty before the release build is executed
+            // And the .jar file has been built and exists after the release build has been executed
             pipeline.assertEmptySearchStepByDisplayName("Release build", "releaseVersion", true)
                     .assertFileNotExistsSearchStepByDisplayName("Release build",
                             "$(System.DefaultWorkingDirectory)/target/hello-pipeline-$(releaseVersion).jar",
                             false);
 
-            // When the pipeline starts
+            // When the pipeline starts from the master branch
             pipeline.startPipeline("master");
         }
         catch (IOException e) {
@@ -85,20 +80,12 @@ public class PipelineUnit {
         logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
         try {
-            // Given there is a pipeline
+            // Given there is a pipeline with a release build and a deployment to a target
             pipeline = new AzDoPipeline("hello-pipeline-my.properties", "./pipeline/pipeline-release-and-deploy.yml");
 
-            // TESTTESTTESTTESTTESTTESTTESTTESTTESTTEST
-            DeleteJUnitPipelineDependency hook1 = new DeleteJUnitPipelineDependency ("C:\\Users\\Henry\\Documents\\Github\\hello-pipeline-test\\pom.xml", "io.github.hvmerode", "junit-pipeline");
-            DeleteTargetFile hook2 = new DeleteTargetFile("C:\\Users\\Henry\\Documents\\Github\\hello-pipeline-test\\src\\test\\java\\PipelineUnit.java");
-            List<Hook> hooks = new ArrayList<>();
-            hooks.add(hook1);
-            hooks.add(hook2);
-            // TESTTESTTESTTESTTESTTESTTESTTESTTESTTEST
-
-            // And the pipeline is not tagged with the release version
+            // And the Azure DevOps pipeline run is not tagged with the release version
             // And the artifact does not run on the Azure DevOps agent
-            // And a curl command is executed, deploying the artifact
+            // And a curl command to deploy the artifact is executed
             String htmlOutput = "<html>\n  <head>\n    <title>\n      Mock deployment\n    </title>\n  </head>\n</html>\n";
             pipeline.skipStepSearchByDisplayName("Tag the pipeline with a release version")
                     .skipStepSearchByDisplayName("Execute app on the AzDo agent")
@@ -106,8 +93,8 @@ public class PipelineUnit {
                             "curl",
                             htmlOutput);
 
-            // When the pipeline starts
-            pipeline.startPipeline("master", hooks);
+            // When the pipeline starts from the master branch
+            pipeline.startPipeline("master");
         }
         catch (IOException e) {
             logger.error(e.getMessage());
