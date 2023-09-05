@@ -11,16 +11,17 @@ variables:
     value: 1.0.0
 
 stages:
-  - stage: execute_build_and_deploy_stage
-    displayName: Execute build
+  - stage: hello_pipeline_stage
+    displayName: Hello Pipeline
     jobs:
-      - job: execute_build_and_deploy_job
+      - job: execute_snapshot_build_job
+        displayName: Execute Snapshot Build Job
+        condition: and(succeeded(), ne(variables['Build.SourceBranchName'], 'master'))
         pool:
           vmImage: ubuntu-latest
         steps:
-            # Perform a snapshot build in case the build starts from a feature branch
+          # Perform a snapshot build in case the build starts from a feature branch
           - task: Maven@3
-            condition: and(succeeded(), ne(variables['Build.SourceBranchName'], 'master'))
             displayName: 'Snapshot build'
             inputs:
               mavenPomFile: pom.xml
@@ -31,9 +32,14 @@ stages:
               publishJUnitResults: true
               goals: clean install
 
+      - job: execute_release_build_and_deploy_job
+        displayName: Execute Release Build and Deploy Job
+        condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
+        pool:
+          vmImage: ubuntu-latest
+        steps:
             # Perform a release build in case the build starts from the master branch
           - task: Maven@3
-            condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
             displayName: 'Release build'
             inputs:
               mavenPomFile: pom.xml
@@ -47,17 +53,14 @@ stages:
             # Tag the pipeline if it is a release build (branch is master)
           - script: |
               echo "##vso[build.addbuildtag]$(releaseVersion)"
-            condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
             displayName: 'Tag the pipeline with a release version'
 
             # Run it locally on the agent (branch is master)
           - script: |
               java -cp $(System.DefaultWorkingDirectory)/target/hello-pipeline-$(releaseVersion).jar Main $(releaseVersion)
-            condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
             displayName: 'Execute app on the AzDo agent'
 
             # Deploy it to target environment using curl (branch is master)
           - script: |
               curl --verbose --request POST --data @'$(System.DefaultWorkingDirectory)/target/hello-pipeline-$(releaseVersion).jar' https://example.com
-            condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
             displayName: 'Deploy to target'

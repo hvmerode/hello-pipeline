@@ -7,16 +7,17 @@ name: $(Date:yyyyMMdd)$(Rev:.r)
 trigger: none
 
 stages:
-  - stage: execute_snaphot_build_stage
-    displayName: Execute build
+  - stage: hello_pipeline_stage
+    displayName: Hello Pipeline
     jobs:
-      - job: execute_snaphot_build_job
+      - job: execute_snapshot_build_job
+        displayName: Execute Snapshot Build Job
+        condition: and(succeeded(), ne(variables['Build.SourceBranchName'], 'master'))
         pool:
           vmImage: ubuntu-latest
         steps:
           # Perform a snapshot build in case the build starts from a feature branch
           - task: Maven@3
-            condition: and(succeeded(), ne(variables['Build.SourceBranchName'], 'master'))
             displayName: 'Snapshot build'
             inputs:
               mavenPomFile: pom.xml

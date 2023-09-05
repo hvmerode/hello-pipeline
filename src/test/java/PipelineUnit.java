@@ -73,7 +73,7 @@ public class PipelineUnit {
 
     @Test
     @Order(3)
-    public void testReleaseAndDeploy() {
+    public void testReleaseBuildAndDeploy() {
         logger.info("");
         logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         logger.info("Perform unit test 3: Test release build and deployment");
