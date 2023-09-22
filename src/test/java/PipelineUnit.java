@@ -38,7 +38,7 @@ public class PipelineUnit {
             logger.error(e.getMessage());
         }
 
-        // Then the result must be 'succeeded'
+        // Then the pipeline result must be 'succeeded'
         Assertions.assertEquals (RunResult.Result.succeeded, pipeline.getRunResult().result);
     }
 
@@ -67,8 +67,10 @@ public class PipelineUnit {
         catch (IOException e) {
             logger.error(e.getMessage());
         }
-        // Then the result must be 'succeeded'
-        Assertions.assertEquals (RunResult.Result.succeeded, pipeline.getRunResult().result);
+        // Then the pipeline result must be 'succeeded' and the snapshot build is skipped
+        RunResult pipelineResult = pipeline.getRunResult();
+        Assertions.assertEquals (RunResult.Result.succeeded, pipelineResult.result);
+        Assertions.assertEquals (RunResult.Result.skipped, pipelineResult.getJobResultSearchByDisplayName("Execute Snapshot Build Job"));
     }
 
     @Test
@@ -99,7 +101,7 @@ public class PipelineUnit {
         catch (IOException e) {
             logger.error(e.getMessage());
         }
-        // Then the result must be 'succeeded'
+        // Then the pipeline result must be 'succeeded'
         Assertions.assertEquals (RunResult.Result.succeeded, pipeline.getRunResult().result);
     }
 
