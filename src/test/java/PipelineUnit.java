@@ -71,6 +71,7 @@ public class PipelineUnit {
         RunResult pipelineResult = pipeline.getRunResult();
         Assertions.assertEquals (RunResult.Result.succeeded, pipelineResult.result);
         Assertions.assertEquals (RunResult.Result.skipped, pipelineResult.getJobResultSearchByDisplayName("Execute Snapshot Build Job"));
+        Assertions.assertEquals (RunResult.Result.succeeded, pipelineResult.getJobResultSearchByDisplayName("Execute Release Build Job"));
     }
 
     @Test
@@ -102,7 +103,10 @@ public class PipelineUnit {
             logger.error(e.getMessage());
         }
         // Then the pipeline result must be 'succeeded'
-        Assertions.assertEquals (RunResult.Result.succeeded, pipeline.getRunResult().result);
+        RunResult pipelineResult = pipeline.getRunResult();
+        Assertions.assertEquals (RunResult.Result.succeeded, pipelineResult.result);
+        Assertions.assertEquals (RunResult.Result.skipped, pipelineResult.getJobResultSearchByDisplayName("Execute Snapshot Build Job"));
+        Assertions.assertEquals (RunResult.Result.succeeded, pipelineResult.getJobResultSearchByDisplayName("Execute Release Build and Deploy Job"));
     }
 
     @AfterAll

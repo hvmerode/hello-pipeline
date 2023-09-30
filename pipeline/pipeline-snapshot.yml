@@ -23,7 +23,7 @@ stages:
               mavenPomFile: pom.xml
               mavenOptions: -Xmx3072m -Drevision=1.0.0-SNAPSHOT
               javaHomeOption: JDKVersion
-              jdkVersionOption: '1.11'
+              jdkVersionOption: '1.17'
               jdkArchitectureOption: x64
               publishJUnitResults: true
               goals: clean install
