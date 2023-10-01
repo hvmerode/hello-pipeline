@@ -67,11 +67,11 @@ public class PipelineUnit {
         catch (IOException e) {
             logger.error(e.getMessage());
         }
-        // Then the pipeline result must be 'succeeded' and the snapshot build is skipped
+        // Then the pipeline result must be 'succeeded', the release build job 'succeeded', and the snapshot build job is 'skipped'
         RunResult pipelineResult = pipeline.getRunResult();
         Assertions.assertEquals (RunResult.Result.succeeded, pipelineResult.result);
-        Assertions.assertEquals (RunResult.Result.skipped, pipelineResult.getJobResultSearchByDisplayName("Execute Snapshot Build Job"));
         Assertions.assertEquals (RunResult.Result.succeeded, pipelineResult.getJobResultSearchByDisplayName("Execute Release Build Job"));
+        Assertions.assertEquals (RunResult.Result.skipped, pipelineResult.getJobResultSearchByDisplayName("Execute Snapshot Build Job"));
     }
 
     @Test
@@ -102,11 +102,11 @@ public class PipelineUnit {
         catch (IOException e) {
             logger.error(e.getMessage());
         }
-        // Then the pipeline result must be 'succeeded'
+        // Then the pipeline result must be 'succeeded', the release/deploy job 'succeeded', and the snapshot build job is 'skipped'
         RunResult pipelineResult = pipeline.getRunResult();
         Assertions.assertEquals (RunResult.Result.succeeded, pipelineResult.result);
+        Assertions.assertEquals (RunResult.Result.succeeded, pipelineResult.getJobResultSearchByDisplayName("Execute Release Build Job"));
         Assertions.assertEquals (RunResult.Result.skipped, pipelineResult.getJobResultSearchByDisplayName("Execute Snapshot Build Job"));
-        Assertions.assertEquals (RunResult.Result.succeeded, pipelineResult.getJobResultSearchByDisplayName("Execute Release Build and Deploy Job"));
     }
 
     @AfterAll
