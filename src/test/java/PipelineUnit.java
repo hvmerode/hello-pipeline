@@ -90,8 +90,10 @@ public class PipelineUnit {
             // And the artifact does not run on the Azure DevOps agent
             // And a curl command to deploy the artifact is executed
             String htmlOutput = "<html>\n  <head>\n    <title>\n      Mock deployment\n    </title>\n  </head>\n</html>\n";
-            pipeline.skipStepSearchByDisplayName("Tag the pipeline with a release version")
+            pipeline.skipStepSearchByDisplayName("Release build")
+                    .skipStepSearchByDisplayName("Tag the pipeline with a release version")
                     .skipStepSearchByDisplayName("Execute app on the AzDo agent")
+                    .insertScriptSearchStepByDisplayName("Deploy to target", "mkdir $(System.DefaultWorkingDirectory)/target\necho \'Mock jar\' > $(System.DefaultWorkingDirectory)/target/hello-pipeline-$(releaseVersion).jar", true)
                     .mockBashCommandSearchStepByDisplayName("Deploy to target",
                             "curl",
                             htmlOutput);
